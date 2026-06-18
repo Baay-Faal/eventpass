@@ -17,6 +17,7 @@ const cors = require('cors');
 const morgan = require('morgan');
 const path = require('path');
 const config = require('./config/env');
+const { sequelize } = require('./models');
 
 const app = express();
 
@@ -82,13 +83,35 @@ app.use((err, req, res, next) => {
 });
 
 // ─── Démarrage du serveur ──────────────────────────────────────────────
+// On connecte d'abord Sequelize à MySQL, puis on crée les tables,
+// et enfin on démarre le serveur Express.
 
-app.listen(config.port, () => {
-  console.log(`\n🎫 EventPass API`);
-  console.log(`   Environnement : ${config.nodeEnv}`);
-  console.log(`   Port          : ${config.port}`);
-  console.log(`   URL           : http://localhost:${config.port}`);
-  console.log(`   Health check  : http://localhost:${config.port}/api/health\n`);
-});
+const startServer = async () => {
+  try {
+    // 1. Tester la connexion à MySQL
+    await sequelize.authenticate();
+    console.log('✅ Connexion à MySQL réussie');
+
+    // 2. Synchroniser les modèles avec la base de données
+    // alter: true → modifie les tables existantes si le modèle a changé
+    // ⚠️ En production, on utiliserait des migrations à la place
+    await sequelize.sync({ alter: true });
+    console.log('✅ Tables synchronisées');
+
+    // 3. Démarrer le serveur Express
+    app.listen(config.port, () => {
+      console.log(`\n🎫 EventPass API`);
+      console.log(`   Environnement : ${config.nodeEnv}`);
+      console.log(`   Port          : ${config.port}`);
+      console.log(`   URL           : http://localhost:${config.port}`);
+      console.log(`   Health check  : http://localhost:${config.port}/api/health\n`);
+    });
+  } catch (error) {
+    console.error('❌ Impossible de démarrer le serveur :', error.message);
+    process.exit(1);
+  }
+};
+
+startServer();
 
 module.exports = app;
