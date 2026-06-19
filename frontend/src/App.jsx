@@ -3,6 +3,8 @@ import Navbar from './components/layout/Navbar';
 import Home from './pages/Home';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
+import ForgotPassword from './pages/auth/ForgotPassword';
+import ResetPassword from './pages/auth/ResetPassword';
 import Catalog from './pages/events/Catalog';
 import EventDetail from './pages/events/EventDetail';
 import MyTickets from './pages/visitor/MyTickets';
@@ -24,6 +26,8 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/events" element={<Catalog />} />
           <Route path="/events/:id" element={<EventDetail />} />
           

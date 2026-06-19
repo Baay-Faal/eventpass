@@ -52,6 +52,16 @@ const User = sequelize.define('User', {
     defaultValue: true,                // Compte actif par défaut
     field: 'is_active',
   },
+  resetPasswordToken: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    field: 'reset_password_token',
+  },
+  resetPasswordExpires: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    field: 'reset_password_expires',
+  },
 }, {
   tableName: 'users',                  // Nom de la table en base de données
 });

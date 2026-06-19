@@ -94,4 +94,45 @@ router.post('/refresh', authController.refresh);
  */
 router.post('/logout', authMiddleware, authController.logout);
 
+/**
+ * @swagger
+ * /api/auth/forgot-password:
+ *   post:
+ *     summary: Demander la réinitialisation du mot de passe
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email: { type: string }
+ *     responses:
+ *       200:
+ *         description: Demande traitée (mail envoyé simulé)
+ */
+router.post('/forgot-password', authController.forgotPassword);
+
+/**
+ * @swagger
+ * /api/auth/reset-password:
+ *   post:
+ *     summary: Réinitialiser le mot de passe avec le token
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               token: { type: string }
+ *               newPassword: { type: string }
+ *     responses:
+ *       200:
+ *         description: Mot de passe réinitialisé
+ */
+router.post('/reset-password', authController.resetPassword);
+
 module.exports = router;

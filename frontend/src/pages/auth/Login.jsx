@@ -67,7 +67,10 @@ const Login = () => {
           </Button>
         </form>
 
-        <div className="mt-10 pt-8 border-t-2 border-brand-border">
+        <div className="mt-10 pt-8 border-t-2 border-brand-border flex flex-col space-y-4">
+          <Link to="/forgot-password" className="font-bold text-brand-red hover:text-brand-black uppercase tracking-wide transition-colors">
+            Mot de passe oublié ?
+          </Link>
           <Link to="/register" className="font-bold text-brand-gray hover:text-brand-black uppercase tracking-wide transition-colors">
             Créer un compte
           </Link>

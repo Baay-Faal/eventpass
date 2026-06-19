@@ -10,6 +10,8 @@
 
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+const { Op } = require('sequelize');
 const { User } = require('../models');
 const config = require('../config/env');
 
@@ -238,9 +240,99 @@ const logout = async (req, res) => {
   });
 };
 
+// ─── FORGOT PASSWORD ─────────────────────────────────────────────────────
+// POST /api/auth/forgot-password
+// Demande de réinitialisation de mot de passe
+
+const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'L\'email est requis.' });
+    }
+
+    const user = await User.findOne({ where: { email } });
+    if (!user || !user.isActive) {
+      // Pour des raisons de sécurité, on renvoie un succès même si l'email n'existe pas
+      // pour éviter de lister les emails existants.
+      return res.json({ success: true, message: 'Si l\'email existe, un lien de réinitialisation vous a été envoyé.' });
+    }
+
+    // Générer un token unique
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    // Le hasher pour le stocker en base (sécurité supplémentaire)
+    const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+
+    // Mettre à jour l'utilisateur (valable 1 heure)
+    user.resetPasswordToken = hashedToken;
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 heure
+    await user.save();
+
+    // Normalement, on envoie un email ici.
+    // Comme on n'a pas de SMTP, on simule l'envoi en affichant le lien dans la console
+    // et en le renvoyant dans la réponse (pour pouvoir tester).
+    const resetUrl = `http://localhost:5173/reset-password?token=${resetToken}`;
+    console.log(`[SIMULATION EMAIL] URL de réinitialisation pour ${email}: ${resetUrl}`);
+
+    res.json({
+      success: true,
+      message: 'Si l\'email existe, un lien de réinitialisation vous a été envoyé.',
+      // RETIRER resetUrl EN PRODUCTION !! C'est uniquement pour tester.
+      resetUrl: process.env.NODE_ENV !== 'production' ? resetUrl : undefined
+    });
+
+  } catch (error) {
+    console.error('Erreur forgotPassword:', error);
+    res.status(500).json({ success: false, message: 'Erreur serveur.' });
+  }
+};
+
+// ─── RESET PASSWORD ──────────────────────────────────────────────────────
+// POST /api/auth/reset-password
+// Réinitialisation effective avec le token
+
+const resetPassword = async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+
+    if (!token || !newPassword) {
+      return res.status(400).json({ success: false, message: 'Token et nouveau mot de passe requis.' });
+    }
+
+    // Hasher le token reçu pour le comparer avec celui en base
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+    const user = await User.findOne({
+      where: {
+        resetPasswordToken: hashedToken,
+        resetPasswordExpires: { [Op.gt]: Date.now() } // Doit être dans le futur
+      }
+    });
+
+    if (!user) {
+      return res.status(400).json({ success: false, message: 'Token invalide ou expiré.' });
+    }
+
+    // Mettre à jour le mot de passe
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    user.resetPasswordToken = null;
+    user.resetPasswordExpires = null;
+    await user.save();
+
+    res.json({ success: true, message: 'Mot de passe réinitialisé avec succès.' });
+
+  } catch (error) {
+    console.error('Erreur resetPassword:', error);
+    res.status(500).json({ success: false, message: 'Erreur serveur.' });
+  }
+};
+
 module.exports = {
   register,
   login,
   refresh,
   logout,
+  forgotPassword,
+  resetPassword,
 };
