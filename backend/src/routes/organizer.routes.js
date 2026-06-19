@@ -35,4 +35,64 @@ router.patch('/events/:id/publish', organizerController.publishEvent);
 // PATCH /api/organizer/events/:id/cancel → Annuler un événement
 router.patch('/events/:id/cancel', organizerController.cancelEvent);
 
+/**
+ * @swagger
+ * /api/organizer/events/{id}/tickets:
+ *   get:
+ *     summary: Récupérer tous les billets d'un événement
+ *     tags: [Organizer]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Liste des billets
+ */
+router.get('/events/:id/tickets', organizerController.getEventTickets);
+
+/**
+ * @swagger
+ * /api/organizer/tickets/{id}/approve:
+ *   patch:
+ *     summary: Approuver un billet en attente
+ *     tags: [Organizer]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Billet approuvé
+ */
+router.patch('/tickets/:id/approve', organizerController.approveTicket);
+
+/**
+ * @swagger
+ * /api/organizer/tickets/{id}/reject:
+ *   patch:
+ *     summary: Refuser un billet en attente
+ *     tags: [Organizer]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Billet refusé
+ */
+router.patch('/tickets/:id/reject', organizerController.rejectTicket);
+
 module.exports = router;

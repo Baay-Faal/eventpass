@@ -7,9 +7,10 @@
  *     (chaque billet a son propre secret → impossible de deviner la signature)
  * 
  * Statuts :
+ *   PENDING   → en attente d'approbation par l'organisateur
  *   VALID     → billet actif, pas encore utilisé
  *   USED      → billet scanné et validé à l'entrée
- *   CANCELLED → billet annulé par le visiteur
+ *   CANCELLED → billet annulé par le visiteur ou refusé par l'organisateur
  * 
  * Règle métier : max 3 billets par utilisateur par événement
  * (cette règle est vérifiée dans le controller, pas dans le modèle)
@@ -35,7 +36,7 @@ const Ticket = sequelize.define('Ticket', {
     field: 'qr_secret',
   },
   status: {
-    type: DataTypes.ENUM('VALID', 'USED', 'CANCELLED'),
+    type: DataTypes.ENUM('PENDING', 'VALID', 'USED', 'CANCELLED'),
     defaultValue: 'VALID',
     allowNull: false,
   },

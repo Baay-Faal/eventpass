@@ -11,6 +11,7 @@ import MyTickets from './pages/visitor/MyTickets';
 import LiveTicket from './pages/visitor/LiveTicket';
 import Dashboard from './pages/organizer/Dashboard';
 import EventForm from './pages/organizer/EventForm';
+import EventTickets from './pages/organizer/EventTickets';
 import CheckinScanner from './pages/agent/CheckinScanner';
 import AdminPanel from './pages/admin/AdminPanel';
 
@@ -39,6 +40,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/dashboard/create" element={<EventForm />} />
           <Route path="/dashboard/edit/:id" element={<EventForm />} />
+          <Route path="/dashboard/events/:id/tickets" element={<EventTickets />} />
 
           {/* Routes Agent */}
           <Route path="/scan" element={<CheckinScanner />} />

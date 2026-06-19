@@ -43,12 +43,13 @@ const MyTickets = () => {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {tickets.map((ticket) => (
               <Link to={`/my-tickets/${ticket.id}`} key={ticket.id} className="block group">
-                <div className={`border-2 ${ticket.status === 'VALID' ? 'border-brand-black hover:border-brand-red' : 'border-brand-border opacity-50'} transition-colors flex flex-col h-full bg-white`}>
+                <div className={`border-2 ${ticket.status === 'VALID' ? 'border-brand-black hover:border-brand-red' : ticket.status === 'PENDING' ? 'border-yellow-400' : 'border-brand-border opacity-50'} transition-colors flex flex-col h-full bg-white`}>
                   
                   <div className="p-6 border-b-2 border-brand-border flex justify-between items-center bg-brand-light">
                     <span className="font-black font-mono text-lg">{ticket.code}</span>
                     <span className={`px-2 py-1 text-xs font-black uppercase border-2 ${
                       ticket.status === 'VALID' ? 'border-brand-black text-brand-black' : 
+                      ticket.status === 'PENDING' ? 'border-yellow-400 bg-yellow-400 text-black' :
                       ticket.status === 'USED' ? 'border-brand-gray text-brand-gray' : 'border-brand-error text-brand-error'
                     }`}>
                       {ticket.status}
@@ -70,6 +71,11 @@ const MyTickets = () => {
                   {ticket.status === 'VALID' && (
                     <div className="p-4 bg-brand-black text-white text-center font-black uppercase text-sm tracking-widest group-hover:bg-brand-red transition-colors">
                       Afficher le Pass
+                    </div>
+                  )}
+                  {ticket.status === 'PENDING' && (
+                    <div className="p-4 bg-yellow-400 text-black text-center font-black uppercase text-sm tracking-widest cursor-not-allowed">
+                      Approbation requise
                     </div>
                   )}
                 </div>

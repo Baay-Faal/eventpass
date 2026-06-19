@@ -57,7 +57,7 @@ const purchaseTickets = async (req, res) => {
 
     // 2. Vérifier la capacité de l'événement
     const ticketsSold = await Ticket.count({
-      where: { eventId, status: ['VALID', 'USED'] },
+      where: { eventId, status: ['VALID', 'USED', 'PENDING'] },
       transaction: t,
     });
 
@@ -68,7 +68,7 @@ const purchaseTickets = async (req, res) => {
 
     // 3. Vérifier la RÈGLE MÉTIER : Max 3 billets par utilisateur pour cet événement
     const userTicketsCount = await Ticket.count({
-      where: { eventId, userId, status: ['VALID', 'USED'] },
+      where: { eventId, userId, status: ['VALID', 'USED', 'PENDING'] },
       transaction: t,
     });
 
@@ -86,7 +86,7 @@ const purchaseTickets = async (req, res) => {
       const ticket = await Ticket.create({
         code: generateTicketCode(),
         qrSecret: generateQrSecret(),
-        status: 'VALID',
+        status: event.requiresApproval ? 'PENDING' : 'VALID',
         userId,
         eventId,
       }, { transaction: t });

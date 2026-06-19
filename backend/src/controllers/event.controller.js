@@ -91,7 +91,7 @@ const getEventById = async (req, res) => {
     const ticketsSold = await Ticket.count({
       where: {
         eventId: event.id,
-        status: 'VALID' // On ne compte pas les billets annulés
+        status: ['VALID', 'USED', 'PENDING'] // On compte aussi ceux en attente
       }
     });
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Edit2, Calendar } from 'lucide-react';
+import { Plus, Edit2, Calendar, Ticket } from 'lucide-react';
 import api from '../../api/axios';
 import Button from '../../components/ui/Button';
 
@@ -136,8 +136,13 @@ const Dashboard = () => {
                           Publier
                         </Button>
                       )}
+                      <Link to={`/dashboard/events/${event.id}/tickets`}>
+                        <Button variant="ghost" size="sm" className="!px-3 text-brand-black hover:bg-brand-black hover:text-white transition-colors" title="Gérer les billets">
+                          <Ticket size={18} />
+                        </Button>
+                      </Link>
                       <Link to={`/dashboard/edit/${event.id}`}>
-                        <Button variant="ghost" size="sm" className="!px-3">
+                        <Button variant="ghost" size="sm" className="!px-3" title="Modifier">
                           <Edit2 size={18} />
                         </Button>
                       </Link>

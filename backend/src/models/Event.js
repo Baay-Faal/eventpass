@@ -63,6 +63,12 @@ const Event = sequelize.define('Event', {
     type: DataTypes.STRING,            // URL de l'image de couverture
     allowNull: true,                   // Optionnel
   },
+  requiresApproval: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+    allowNull: false,
+    field: 'requires_approval',
+  },
   status: {
     type: DataTypes.ENUM('DRAFT', 'PUBLISHED', 'CANCELLED', 'COMPLETED'),
     defaultValue: 'DRAFT',            // Un événement commence en brouillon

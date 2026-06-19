@@ -5,7 +5,7 @@
  * Un événement passe par un cycle de vie : DRAFT → PUBLISHED.
  */
 
-const { Event, Ticket } = require('../models');
+const { Event, Ticket, User } = require('../models');
 
 // GET /api/organizer/events
 // Liste tous les événements de l'organisateur connecté
@@ -27,7 +27,7 @@ const getMyEvents = async (req, res) => {
 // Création d'un événement (démarre toujours en statut DRAFT)
 const createEvent = async (req, res) => {
   try {
-    const { title, description, category, date, venue, address, capacity, price } = req.body;
+    const { title, description, category, date, venue, address, capacity, price, requiresApproval } = req.body;
 
     // Si une image a été uploadée, multer l'a mise dans req.file
     // On sauvegarde uniquement le nom du fichier en base
@@ -35,6 +35,13 @@ const createEvent = async (req, res) => {
 
     if (!title || !description || !category || !date || !venue || !address || !capacity || !price) {
       return res.status(400).json({ success: false, message: 'Tous les champs sont obligatoires.' });
+    }
+
+    const isApprovalRequired = requiresApproval === 'true' || requiresApproval === true;
+
+    // LIMITE : 150 places max pour les événements privés
+    if (isApprovalRequired && capacity > 150) {
+      return res.status(400).json({ success: false, message: 'Un événement privé ne peut pas dépasser 150 places.' });
     }
 
     const newEvent = await Event.create({
@@ -46,6 +53,7 @@ const createEvent = async (req, res) => {
       address,
       capacity,
       price,
+      requiresApproval: isApprovalRequired,
       image,
       status: 'DRAFT', // Forcé à DRAFT à la création
       organizerId: req.user.id, // L'ID vient du token JWT (authMiddleware)
@@ -82,6 +90,18 @@ const updateEvent = async (req, res) => {
     // Mise à jour des champs
     const updateData = { ...req.body };
     
+    if (updateData.requiresApproval !== undefined) {
+      updateData.requiresApproval = updateData.requiresApproval === 'true' || updateData.requiresApproval === true;
+    }
+
+    // LIMITE : 150 places max pour les événements privés
+    const finalRequiresApproval = updateData.requiresApproval !== undefined ? updateData.requiresApproval : event.requiresApproval;
+    const finalCapacity = updateData.capacity !== undefined ? parseInt(updateData.capacity, 10) : event.capacity;
+    
+    if (finalRequiresApproval && finalCapacity > 150) {
+      return res.status(400).json({ success: false, message: 'Un événement privé ne peut pas dépasser 150 places.' });
+    }
+
     // Si une nouvelle image a été uploadée, on met à jour le champ image
     if (req.file) {
       updateData.image = req.file.filename;
@@ -220,6 +240,97 @@ const getDashboardStats = async (req, res) => {
   }
 };
 
+// GET /api/organizer/events/:id/tickets
+// Liste tous les billets pour un événement précis
+const getEventTickets = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Vérifier que l'événement appartient à l'organisateur
+    const event = await Event.findOne({ where: { id, organizerId: req.user.id } });
+    if (!event) {
+      return res.status(404).json({ success: false, message: 'Événement introuvable.' });
+    }
+
+    const tickets = await Ticket.findAll({
+      where: { eventId: id },
+      include: [{
+        model: User,
+        as: 'user', // L'alias défini dans l'association
+        attributes: ['id', 'firstName', 'lastName', 'email']
+      }],
+      order: [['purchasedAt', 'DESC']]
+    });
+
+    res.json({ success: true, data: tickets });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Erreur serveur.' });
+  }
+};
+
+// PATCH /api/organizer/tickets/:id/approve
+// Approuve un billet en attente
+const approveTicket = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const ticket = await Ticket.findByPk(id, {
+      include: [{ model: Event, as: 'event' }]
+    });
+
+    if (!ticket) {
+      return res.status(404).json({ success: false, message: 'Billet introuvable.' });
+    }
+
+    if (ticket.event.organizerId !== req.user.id) {
+      return res.status(403).json({ success: false, message: 'Accès non autorisé.' });
+    }
+
+    if (ticket.status !== 'PENDING') {
+      return res.status(400).json({ success: false, message: 'Ce billet n\'est pas en attente d\'approbation.' });
+    }
+
+    await ticket.update({ status: 'VALID' });
+
+    res.json({ success: true, message: 'Billet approuvé avec succès.', data: ticket });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Erreur serveur.' });
+  }
+};
+
+// PATCH /api/organizer/tickets/:id/reject
+// Refuse un billet en attente
+const rejectTicket = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const ticket = await Ticket.findByPk(id, {
+      include: [{ model: Event, as: 'event' }]
+    });
+
+    if (!ticket) {
+      return res.status(404).json({ success: false, message: 'Billet introuvable.' });
+    }
+
+    if (ticket.event.organizerId !== req.user.id) {
+      return res.status(403).json({ success: false, message: 'Accès non autorisé.' });
+    }
+
+    if (ticket.status !== 'PENDING') {
+      return res.status(400).json({ success: false, message: 'Ce billet n\'est pas en attente d\'approbation.' });
+    }
+
+    await ticket.update({ status: 'CANCELLED' });
+
+    res.json({ success: true, message: 'Billet refusé.', data: ticket });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Erreur serveur.' });
+  }
+};
+
 module.exports = {
   getMyEvents,
   createEvent,
@@ -227,4 +338,7 @@ module.exports = {
   publishEvent,
   cancelEvent,
   getDashboardStats,
+  getEventTickets,
+  approveTicket,
+  rejectTicket,
 };

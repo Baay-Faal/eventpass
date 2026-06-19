@@ -20,7 +20,11 @@ const LiveTicket = () => {
       const response = await api.get(`/tickets/${id}`);
       setTicket(response.data.data);
       if (response.data.data.status !== 'VALID') {
-        setError("Ce billet n'est plus valide pour le scan.");
+        if (response.data.data.status === 'PENDING') {
+          setError("Ce billet est en attente d'approbation par l'organisateur.");
+        } else {
+          setError("Ce billet n'est plus valide pour le scan.");
+        }
       }
     } catch (err) {
       setError("Impossible de charger le billet.");

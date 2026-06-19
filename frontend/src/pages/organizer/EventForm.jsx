@@ -22,6 +22,7 @@ const EventForm = () => {
     address: '',
     capacity: '',
     price: '',
+    requiresApproval: false,
   });
   const [image, setImage] = useState(null);
 
@@ -58,6 +59,7 @@ const EventForm = () => {
             address: event.address,
             capacity: event.capacity,
             price: event.price,
+            requiresApproval: event.requiresApproval,
           });
         } catch (err) {
           setError("Impossible de charger les données de l'événement.");
@@ -68,7 +70,8 @@ const EventForm = () => {
   }, [id, isEditMode]);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+    setFormData({ ...formData, [e.target.name]: value });
   };
 
   const handleImageChange = (e) => {
@@ -202,15 +205,23 @@ const EventForm = () => {
             </div>
 
             <div className="grid grid-cols-2 gap-6">
-              <Input
-                label="Capacité (Nombre de places)"
-                type="number"
-                name="capacity"
-                required
-                min={1}
-                value={formData.capacity}
-                onChange={handleChange}
-              />
+              <div className="flex flex-col">
+                <Input
+                  label="Capacité (Nombre de places)"
+                  type="number"
+                  name="capacity"
+                  required
+                  min={1}
+                  max={formData.requiresApproval ? 150 : undefined}
+                  value={formData.capacity}
+                  onChange={handleChange}
+                />
+                {formData.requiresApproval && (
+                  <span className="text-xs text-brand-error mt-2 font-bold uppercase">
+                    Max 150 places pour un événement privé.
+                  </span>
+                )}
+              </div>
               <Input
                 label="Prix unitaire (FCFA)"
                 type="number"
@@ -220,6 +231,31 @@ const EventForm = () => {
                 value={formData.price}
                 onChange={handleChange}
               />
+            </div>
+
+            <div className="pt-4 border-t-2 border-brand-border">
+              <label className="flex items-center space-x-3 cursor-pointer group">
+                <div className="relative flex items-center">
+                  <input
+                    type="checkbox"
+                    name="requiresApproval"
+                    checked={formData.requiresApproval}
+                    onChange={handleChange}
+                    className="peer appearance-none w-6 h-6 border-2 border-brand-black bg-white checked:bg-brand-black focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 transition-colors cursor-pointer"
+                  />
+                  <svg className="absolute w-4 h-4 text-white left-1 pointer-events-none opacity-0 peer-checked:opacity-100 transition-opacity" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div>
+                  <span className="block font-bold uppercase tracking-wide text-brand-black group-hover:text-brand-red transition-colors">
+                    Événement Privé / VIP
+                  </span>
+                  <span className="block text-sm text-brand-gray">
+                    Cocher pour exiger votre approbation manuelle avant la délivrance des billets.
+                  </span>
+                </div>
+              </label>
             </div>
           </div>
 
