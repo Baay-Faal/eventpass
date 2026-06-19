@@ -8,29 +8,26 @@ const Button = ({
   isLoading = false,
   ...props 
 }) => {
-  // Styles de base du cahier des charges : bords arrondis, transition douce, texte centré
-  const baseStyles = 'inline-flex items-center justify-center font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
+  // Style "Nike" : massif, bords francs ou très peu arrondis, texte en gras
+  const baseStyles = 'inline-flex items-center justify-center font-bold tracking-wide uppercase transition-colors focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed';
   
-  // Tailles
   const sizes = {
-    sm: 'px-3 py-1.5 text-sm',
-    md: 'px-4 py-2 text-base',
-    lg: 'px-6 py-3 text-lg',
+    sm: 'px-4 py-2 text-xs',
+    md: 'px-6 py-3 text-sm',
+    lg: 'px-8 py-4 text-base',
   };
 
-  // Variantes (Couleurs du cahier des charges)
   const variants = {
-    primary: 'bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500 shadow-sm',
-    secondary: 'bg-secondary-500 text-white hover:bg-secondary-600 focus:ring-secondary-400 shadow-sm',
-    outline: 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:ring-primary-500',
-    danger: 'bg-red-500 text-white hover:bg-red-600 focus:ring-red-500',
-    ghost: 'bg-transparent text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+    primary: 'bg-brand-black text-white hover:bg-gray-800',
+    accent: 'bg-brand-red text-white hover:bg-red-700',
+    outline: 'border-2 border-brand-black text-brand-black hover:bg-brand-black hover:text-white',
+    ghost: 'bg-transparent text-brand-black hover:bg-brand-light'
   };
 
   return (
     <motion.button
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
+      whileHover={{ scale: 1.01 }}
+      whileTap={{ scale: 0.99 }}
       className={`${baseStyles} ${sizes[size]} ${variants[variant]} ${className}`}
       disabled={isLoading || props.disabled}
       {...props}

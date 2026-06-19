@@ -1,24 +1,10 @@
-import { motion } from 'framer-motion';
-
-const Card = ({ children, className = '', hoverEffect = false, ...props }) => {
-  // Style "Premium" exigé par le cahier des charges : fond blanc, bords arrondis, ombre douce
-  const baseStyles = 'bg-white rounded-xl shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1)] overflow-hidden border border-gray-100';
+const Card = ({ children, className = '', noPadding = false, ...props }) => {
+  // Finis les ombres douces et les gros arrondis. 
+  // Place à des blocs francs, un fond gris clair ou blanc avec une bordure fine.
+  const baseStyles = 'bg-white border border-brand-border';
   
-  if (hoverEffect) {
-    return (
-      <motion.div
-        whileHover={{ y: -4, boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}
-        transition={{ duration: 0.2 }}
-        className={`${baseStyles} ${className}`}
-        {...props}
-      >
-        {children}
-      </motion.div>
-    );
-  }
-
   return (
-    <div className={`${baseStyles} ${className}`} {...props}>
+    <div className={`${baseStyles} ${!noPadding ? 'p-6 md:p-8' : ''} ${className}`} {...props}>
       {children}
     </div>
   );
