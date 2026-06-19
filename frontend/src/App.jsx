@@ -5,6 +5,8 @@ import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import Catalog from './pages/events/Catalog';
 import EventDetail from './pages/events/EventDetail';
+import MyTickets from './pages/visitor/MyTickets';
+import LiveTicket from './pages/visitor/LiveTicket';
 
 function App() {
   return (
@@ -20,6 +22,10 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/events" element={<Catalog />} />
           <Route path="/events/:id" element={<EventDetail />} />
+          
+          {/* Routes Visiteur */}
+          <Route path="/my-tickets" element={<MyTickets />} />
+          <Route path="/my-tickets/:id" element={<LiveTicket />} />
           
           {/* Les autres routes (Events, Dashboard, Checkin) viendront ici plus tard */}
         </Routes>
