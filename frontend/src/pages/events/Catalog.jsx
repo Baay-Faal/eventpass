@@ -88,9 +88,11 @@ const Catalog = () => {
           </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {events.map((event) => (
+            {events.map((event) => {
+              const isPastEvent = new Date(event.date) < new Date();
+              return (
               <Link to={`/events/${event.id}`} key={event.id} className="group">
-                <Card className="h-full flex flex-col hover:border-brand-black transition-colors" noPadding>
+                <Card className={`h-full flex flex-col transition-colors ${isPastEvent ? 'opacity-60 grayscale' : 'hover:border-brand-black'}`} noPadding>
                   
                   {/* Image Placeholder ou Vraie Image */}
                   <div className="aspect-video bg-brand-light border-b-2 border-brand-border group-hover:border-brand-black transition-colors relative overflow-hidden">
@@ -106,8 +108,15 @@ const Catalog = () => {
                       </div>
                     )}
                     
-                    <div className="absolute top-4 right-4 bg-white text-brand-black px-3 py-1 font-bold text-xs uppercase tracking-wider border-2 border-brand-black">
-                      {event.category}
+                    <div className="absolute top-4 right-4 flex gap-2">
+                      {isPastEvent && (
+                        <div className="bg-brand-black text-white px-3 py-1 font-bold text-xs uppercase tracking-wider border-2 border-brand-black">
+                          TERMINÉ
+                        </div>
+                      )}
+                      <div className="bg-white text-brand-black px-3 py-1 font-bold text-xs uppercase tracking-wider border-2 border-brand-black">
+                        {event.category}
+                      </div>
                     </div>
                   </div>
 
@@ -130,7 +139,7 @@ const Catalog = () => {
                   </div>
                 </Card>
               </Link>
-            ))}
+            )})}
           </div>
         )}
       </div>

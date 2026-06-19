@@ -60,6 +60,8 @@ const EventDetail = () => {
   if (loading) return <div className="text-center py-32 font-black uppercase text-2xl tracking-widest">Chargement...</div>;
   if (!event) return <div className="text-center py-32 font-black uppercase text-2xl text-brand-error">{error}</div>;
 
+  const isPastEvent = new Date(event.date) < new Date();
+
   return (
     <div className="bg-white min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
@@ -80,8 +82,15 @@ const EventDetail = () => {
                   {event.category}
                 </div>
               )}
-              <div className="absolute top-0 left-0 bg-brand-red text-white px-4 py-2 font-black uppercase tracking-widest border-b-4 border-r-4 border-brand-black">
-                {event.category}
+              <div className="absolute top-0 left-0 flex flex-col">
+                <div className="bg-brand-red text-white px-4 py-2 font-black uppercase tracking-widest border-b-4 border-r-4 border-brand-black">
+                  {event.category}
+                </div>
+                {isPastEvent && (
+                  <div className="bg-brand-black text-white px-4 py-2 font-black uppercase tracking-widest border-b-4 border-r-4 border-brand-black inline-block mt-[-4px]">
+                    TERMINÉ
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -132,16 +141,27 @@ const EventDetail = () => {
                 </div>
                 
                 <div className="flex-[2]">
-                  <Button 
-                    variant="accent" 
-                    size="lg" 
-                    className="w-full h-[56px]" 
-                    onClick={handlePurchase}
-                    isLoading={purchaseLoading}
-                    disabled={success}
-                  >
-                    {!user ? 'Se connecter pour acheter' : 'Commander'}
-                  </Button>
+                  {isPastEvent ? (
+                    <Button 
+                      variant="outline" 
+                      size="lg" 
+                      className="w-full h-[56px]" 
+                      disabled={true}
+                    >
+                      Événement Terminé
+                    </Button>
+                  ) : (
+                    <Button 
+                      variant="accent" 
+                      size="lg" 
+                      className="w-full h-[56px]" 
+                      onClick={handlePurchase}
+                      isLoading={purchaseLoading}
+                      disabled={success}
+                    >
+                      {!user ? 'Se connecter pour acheter' : 'Commander'}
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>

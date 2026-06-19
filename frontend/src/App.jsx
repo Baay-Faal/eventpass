@@ -7,6 +7,8 @@ import Catalog from './pages/events/Catalog';
 import EventDetail from './pages/events/EventDetail';
 import MyTickets from './pages/visitor/MyTickets';
 import LiveTicket from './pages/visitor/LiveTicket';
+import Dashboard from './pages/organizer/Dashboard';
+import EventForm from './pages/organizer/EventForm';
 
 function App() {
   return (
@@ -26,6 +28,10 @@ function App() {
           {/* Routes Visiteur */}
           <Route path="/my-tickets" element={<MyTickets />} />
           <Route path="/my-tickets/:id" element={<LiveTicket />} />
+          
+          {/* Routes Organisateur */}
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard/create" element={<EventForm />} />
           
           {/* Les autres routes (Events, Dashboard, Checkin) viendront ici plus tard */}
         </Routes>

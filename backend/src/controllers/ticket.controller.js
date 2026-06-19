@@ -49,6 +49,12 @@ const purchaseTickets = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Cet événement n\'est pas ouvert à la billetterie.' });
     }
 
+    // NOUVEAU: Vérifier que l'événement n'est pas passé
+    if (new Date(event.date) < new Date()) {
+      await t.rollback();
+      return res.status(400).json({ success: false, message: 'Cet événement est déjà terminé.' });
+    }
+
     // 2. Vérifier la capacité de l'événement
     const ticketsSold = await Ticket.count({
       where: { eventId, status: ['VALID', 'USED'] },
