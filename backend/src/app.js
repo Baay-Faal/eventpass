@@ -52,7 +52,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // Les routes métier seront ajoutées ici étape par étape :
-// app.use('/api/auth', require('./routes/auth.routes'));
+app.use('/api/auth', require('./routes/auth.routes'));
 // app.use('/api/admin', require('./routes/admin.routes'));
 // app.use('/api/events', require('./routes/event.routes'));
 // app.use('/api/organizer', require('./routes/organizer.routes'));
