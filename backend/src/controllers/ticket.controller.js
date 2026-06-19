@@ -7,6 +7,7 @@
 
 const crypto = require('crypto');
 const { Ticket, Event, User, sequelize } = require('../models');
+const qrService = require('../services/qr.service');
 
 // Fonction utilitaire pour générer un code de billet (ex: EVP-4F9A2B)
 const generateTicketCode = () => {
@@ -181,9 +182,49 @@ const cancelTicket = async (req, res) => {
   }
 };
 
+// GET /api/tickets/:id/qr
+// Génère un QR Code dynamique pour un billet
+const getTicketQR = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // 1. Trouver le billet
+    const ticket = await Ticket.findOne({
+      where: { id, userId: req.user.id }
+    });
+
+    if (!ticket) {
+      return res.status(404).json({ success: false, message: 'Billet introuvable.' });
+    }
+
+    if (ticket.status !== 'VALID') {
+      return res.status(400).json({ success: false, message: 'Ce billet n\'est pas valide (annulé ou déjà utilisé).' });
+    }
+
+    // 2. Générer le payload sécurisé
+    const payloadStr = qrService.generateDynamicQRPayload(ticket.id, ticket.qrSecret);
+
+    // 3. Générer l'image Base64
+    const qrImageBase64 = await qrService.generateQRCodeImage(payloadStr);
+
+    res.json({
+      success: true,
+      data: {
+        qrCode: qrImageBase64,
+        expiresIn: '60s' // Indication pour le frontend : recharger le QR après 60s
+      }
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Erreur serveur.' });
+  }
+};
+
 module.exports = {
   purchaseTickets,
   getMyTickets,
   getTicketById,
   cancelTicket,
+  getTicketQR,
 };

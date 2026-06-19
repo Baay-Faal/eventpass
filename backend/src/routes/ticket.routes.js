@@ -27,4 +27,7 @@ router.get('/:id', ticketController.getTicketById);
 // PATCH /api/tickets/:id/cancel → Annuler un billet
 router.patch('/:id/cancel', ticketController.cancelTicket);
 
+// GET /api/tickets/:id/qr → Obtenir le QR Code dynamique
+router.get('/:id/qr', ticketController.getTicketQR);
+
 module.exports = router;
