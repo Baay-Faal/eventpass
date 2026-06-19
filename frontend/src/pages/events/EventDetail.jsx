@@ -61,6 +61,7 @@ const EventDetail = () => {
   if (!event) return <div className="text-center py-32 font-black uppercase text-2xl text-brand-error">{error}</div>;
 
   const isPastEvent = new Date(event.date) < new Date();
+  const isSoldOut = event.availableTickets <= 0;
 
   return (
     <div className="bg-white min-h-screen">
@@ -112,6 +113,16 @@ const EventDetail = () => {
               <p><strong className="text-brand-black uppercase text-sm mr-2">Lieu:</strong> {event.venue}</p>
               <p><strong className="text-brand-black uppercase text-sm mr-2">Adresse:</strong> {event.address}</p>
               <p><strong className="text-brand-black uppercase text-sm mr-2">Organisateur:</strong> {event.organizer?.firstName} {event.organizer?.lastName}</p>
+              <p>
+                <strong className="text-brand-black uppercase text-sm mr-2">Disponibilité:</strong> 
+                {isSoldOut ? (
+                  <span className="bg-brand-black text-white px-3 py-1 font-bold text-sm uppercase">Complet</span>
+                ) : (
+                  <span className="bg-brand-light border-2 border-brand-black text-brand-black px-3 py-1 font-bold text-sm uppercase">
+                    {event.availableTickets} Billet(s) Restant(s)
+                  </span>
+                )}
+              </p>
             </div>
 
             <p className="text-lg leading-relaxed mb-12">
@@ -149,6 +160,15 @@ const EventDetail = () => {
                       disabled={true}
                     >
                       Événement Terminé
+                    </Button>
+                  ) : isSoldOut ? (
+                    <Button 
+                      variant="outline" 
+                      size="lg" 
+                      className="w-full h-[56px] opacity-50 cursor-not-allowed" 
+                      disabled={true}
+                    >
+                      Complet
                     </Button>
                   ) : (
                     <Button 

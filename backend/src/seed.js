@@ -31,11 +31,11 @@ const seed = async () => {
     // ─── Création des comptes ──────────────────────────────────────────
     // findOrCreate → crée seulement si l'email n'existe pas déjà
     const [admin] = await User.findOrCreate({
-      where: { email: 'admin@eventpass.fr' },
+      where: { email: 'admin@eventpass.com' },
       defaults: {
         firstName: 'Super',
         lastName: 'Admin',
-        email: 'admin@eventpass.fr',
+        email: 'admin@eventpass.com',
         password: adminPassword,
         role: 'ADMIN',
         isActive: true,
@@ -44,11 +44,11 @@ const seed = async () => {
     console.log(`✅ Admin : ${admin.email}`);
 
     const [organisateur] = await User.findOrCreate({
-      where: { email: 'organisateur@eventpass.fr' },
+      where: { email: 'organisateur@eventpass.com' },
       defaults: {
         firstName: 'Jean',
         lastName: 'Dupont',
-        email: 'organisateur@eventpass.fr',
+        email: 'organisateur@eventpass.com',
         password: orgaPassword,
         role: 'ORGANIZER',
         isActive: true,
@@ -57,11 +57,11 @@ const seed = async () => {
     console.log(`✅ Organisateur : ${organisateur.email}`);
 
     const [visiteur] = await User.findOrCreate({
-      where: { email: 'visiteur@eventpass.fr' },
+      where: { email: 'visiteur@eventpass.com' },
       defaults: {
         firstName: 'Marie',
         lastName: 'Martin',
-        email: 'visiteur@eventpass.fr',
+        email: 'visiteur@eventpass.com',
         password: visitorPassword,
         role: 'VISITOR',
         isActive: true,
@@ -70,11 +70,11 @@ const seed = async () => {
     console.log(`✅ Visiteur : ${visiteur.email}`);
 
     const [agent] = await User.findOrCreate({
-      where: { email: 'agent@eventpass.fr' },
+      where: { email: 'agent@eventpass.com' },
       defaults: {
         firstName: 'Pierre',
         lastName: 'Durand',
-        email: 'agent@eventpass.fr',
+        email: 'agent@eventpass.com',
         password: agentPassword,
         role: 'AGENT',
         isActive: true,
@@ -136,10 +136,10 @@ const seed = async () => {
 
     console.log('\n🎉 Seed terminé avec succès !');
     console.log('\n📋 Comptes de démonstration :');
-    console.log('   Admin        → admin@eventpass.fr / Admin1234!');
-    console.log('   Organisateur → organisateur@eventpass.fr / Orga1234!');
-    console.log('   Visiteur     → visiteur@eventpass.fr / Visit1234!');
-    console.log('   Agent        → agent@eventpass.fr / Agent1234!\n');
+    console.log('   Admin        → admin@eventpass.com / Admin1234!');
+    console.log('   Organisateur → organisateur@eventpass.com / Orga1234!');
+    console.log('   Visiteur     → visiteur@eventpass.com / Visit1234!');
+    console.log('   Agent        → agent@eventpass.com / Agent1234!\n');
 
     process.exit(0);
   } catch (error) {

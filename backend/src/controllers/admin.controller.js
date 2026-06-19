@@ -173,26 +173,90 @@ const createAgent = async (req, res) => {
   }
 };
 
+// PATCH /api/admin/agents/:id/status
+const toggleAgentStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { isActive } = req.body;
+
+    if (typeof isActive !== 'boolean') {
+      return res.status(400).json({ success: false, message: 'isActive doit être un booléen.' });
+    }
+
+    const agent = await User.findOne({ where: { id, role: 'AGENT' } });
+    if (!agent) {
+      return res.status(404).json({ success: false, message: 'Agent introuvable.' });
+    }
+
+    await agent.update({ isActive });
+
+    res.json({
+      success: true,
+      message: `Agent ${isActive ? 'activé' : 'désactivé'}.`,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Erreur serveur.' });
+  }
+};
+
 // ─── STATISTIQUES GLOBALES ─────────────────────────────────────────────
 
 // GET /api/admin/stats
 const getGlobalStats = async (req, res) => {
   try {
-    // On exécute toutes ces requêtes en parallèle pour aller plus vite
-    const [totalOrganizers, totalEvents, totalTickets, totalScans] = await Promise.all([
-      User.count({ where: { role: 'ORGANIZER' } }),
-      Event.count(),
-      Ticket.count(),
-      Scan.count(),
-    ]);
+    const organizers = await User.count({ where: { role: 'ORGANIZER' } });
+    const events = await Event.count();
+    const tickets = await Ticket.count();
+    const scans = await Scan.count();
+
+    // Calcul détaillé
+    const allEvents = await Event.findAll({
+      include: [
+        { model: Ticket, as: 'tickets', attributes: ['id'] },
+        { model: User, as: 'organizer', attributes: ['id', 'firstName', 'lastName'] }
+      ]
+    });
+
+    let totalRevenue = 0;
+    const eventStats = [];
+    const organizerRevenue = {};
+
+    allEvents.forEach(evt => {
+      const ticketsSold = evt.tickets ? evt.tickets.length : 0;
+      const revenue = ticketsSold * evt.price;
+      totalRevenue += revenue;
+
+      eventStats.push({
+        id: evt.id,
+        title: evt.title,
+        ticketsSold,
+        revenue
+      });
+
+      if (evt.organizer) {
+        const orgKey = `${evt.organizer.firstName} ${evt.organizer.lastName}`;
+        if (!organizerRevenue[orgKey]) organizerRevenue[orgKey] = 0;
+        organizerRevenue[orgKey] += revenue;
+      }
+    });
+
+    // Formater organizerRevenue en tableau pour le frontend
+    const organizerStats = Object.keys(organizerRevenue).map(name => ({
+      name,
+      revenue: organizerRevenue[name]
+    })).sort((a, b) => b.revenue - a.revenue);
 
     res.json({
       success: true,
       data: {
-        totalOrganizers,
-        totalEvents,
-        totalTickets,
-        totalScans,
+        totalOrganizers: organizers,
+        totalEvents: events,
+        totalTickets: tickets,
+        totalScans: scans,
+        totalRevenue,
+        eventStats: eventStats.sort((a, b) => b.revenue - a.revenue),
+        organizerStats
       },
     });
   } catch (error) {
@@ -208,5 +272,6 @@ module.exports = {
   toggleOrganizerStatus,
   getAgents,
   createAgent,
+  toggleAgentStatus,
   getGlobalStats,
 };

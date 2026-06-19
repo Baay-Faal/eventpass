@@ -1,18 +1,22 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import api from '../../api/axios';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 
 const EventForm = () => {
   const navigate = useNavigate();
+  const { id } = useParams(); // S'il y a un ID, c'est le mode édition
+  const isEditMode = !!id;
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [categories, setCategories] = useState([]);
   
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    category: 'CONCERT',
+    category: '', // vide par défaut, sera défini après le fetch
     date: '',
     venue: '',
     address: '',
@@ -20,6 +24,48 @@ const EventForm = () => {
     price: '',
   });
   const [image, setImage] = useState(null);
+
+  useEffect(() => {
+    // 1. Récupérer les catégories
+    const fetchCategories = async () => {
+      try {
+        const res = await api.get('/categories');
+        setCategories(res.data.data);
+        if (!isEditMode && res.data.data.length > 0) {
+          setFormData(prev => ({ ...prev, category: res.data.data[0].name }));
+        }
+      } catch (err) {
+        console.error("Erreur chargement catégories", err);
+      }
+    };
+
+    fetchCategories();
+
+    // 2. Si mode édition, récupérer l'événement
+    if (isEditMode) {
+      const fetchEvent = async () => {
+        try {
+          const response = await api.get(`/events/${id}`);
+          const event = response.data.data;
+          const formattedDate = new Date(event.date).toISOString().slice(0, 16);
+          
+          setFormData({
+            title: event.title,
+            description: event.description,
+            category: event.category,
+            date: formattedDate,
+            venue: event.venue,
+            address: event.address,
+            capacity: event.capacity,
+            price: event.price,
+          });
+        } catch (err) {
+          setError("Impossible de charger les données de l'événement.");
+        }
+      };
+      fetchEvent();
+    }
+  }, [id, isEditMode]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -46,28 +92,32 @@ const EventForm = () => {
         data.append('image', image);
       }
 
-      await api.post('/organizer/events', data, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
+      if (isEditMode) {
+        await api.put(`/organizer/events/${id}`, data, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+      } else {
+        await api.post('/organizer/events', data, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+      }
 
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.message || 'Erreur lors de la création de l\'événement.');
+      setError(err.response?.data?.message || `Erreur lors de la ${isEditMode ? 'modification' : 'création'} de l'événement.`);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const categories = ['CONCERT', 'MATCH', 'CONFERENCE', 'SPECTACLE', 'AUTRE'];
-
   return (
     <div className="bg-white min-h-screen pb-20">
       <div className="border-b-2 border-brand-black bg-brand-light py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto">
-          <h1 className="uppercase mb-2 text-brand-black">Nouvel Événement</h1>
-          <p className="text-brand-gray font-bold uppercase tracking-widest text-sm">Créez et publiez votre événement</p>
+          <h1 className="uppercase mb-2 text-brand-black">{isEditMode ? 'Modifier l\'événement' : 'Nouvel Événement'}</h1>
+          <p className="text-brand-gray font-bold uppercase tracking-widest text-sm">
+            {isEditMode ? 'Ajustez les détails de votre événement en brouillon' : 'Créez et publiez votre événement'}
+          </p>
         </div>
       </div>
 
@@ -106,16 +156,18 @@ const EventForm = () => {
 
             <div className="grid grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-bold text-brand-black mb-2 uppercase tracking-wide">
-                  Catégorie
-                </label>
-                <select
-                  name="category"
-                  className="w-full px-4 py-3 bg-brand-light border-b-2 border-transparent focus:border-brand-black focus:bg-white focus:outline-none transition-colors"
-                  value={formData.category}
+                <label className="block text-sm font-bold text-brand-black mb-2 uppercase tracking-wide">Catégorie</label>
+                <select 
+                  name="category" 
+                  value={formData.category} 
                   onChange={handleChange}
+                  className="w-full px-4 py-3 bg-white border-2 border-brand-black focus:outline-none font-bold uppercase"
+                  required
                 >
-                  {categories.map(c => <option key={c} value={c}>{c}</option>)}
+                  <option value="" disabled>-- Choisir une catégorie --</option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.name}>{cat.name}</option>
+                  ))}
                 </select>
               </div>
               <Input
@@ -176,13 +228,13 @@ const EventForm = () => {
             
             <div>
               <label className="block text-sm font-bold text-brand-black mb-2 uppercase tracking-wide">
-                Affiche de l'événement (Image)
+                {isEditMode ? 'Nouvelle affiche (optionnel)' : 'Affiche de l\'événement (Image)'}
               </label>
               <input
                 type="file"
                 accept="image/*"
                 onChange={handleImageChange}
-                required
+                required={!isEditMode}
                 className="w-full text-brand-gray file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-bold file:bg-brand-black file:text-white hover:file:bg-gray-800 transition-colors"
               />
             </div>
@@ -193,7 +245,7 @@ const EventForm = () => {
               Annuler
             </Button>
             <Button type="submit" variant="accent" size="lg" isLoading={isLoading}>
-              Créer l'événement
+              {isEditMode ? 'Enregistrer les modifications' : 'Créer l\'événement'}
             </Button>
           </div>
         </form>

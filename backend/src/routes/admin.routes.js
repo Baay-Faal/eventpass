@@ -24,8 +24,15 @@ router.patch('/organizers/:id/status', adminController.toggleOrganizerStatus);
 // ─── ROUTES AGENTS ─────────────────────────────────────────────────────
 router.get('/agents', adminController.getAgents);
 router.post('/agents', adminController.createAgent);
+router.patch('/agents/:id/status', adminController.toggleAgentStatus);
+
+const categoryController = require('../controllers/category.controller');
 
 // ─── ROUTES STATISTIQUES ───────────────────────────────────────────────
 router.get('/stats', adminController.getGlobalStats);
+
+// ─── ROUTES CATEGORIES ─────────────────────────────────────────────────
+router.post('/categories', categoryController.createCategory);
+router.delete('/categories/:id', categoryController.deleteCategory);
 
 module.exports = router;

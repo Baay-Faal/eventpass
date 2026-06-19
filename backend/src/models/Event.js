@@ -30,7 +30,7 @@ const Event = sequelize.define('Event', {
     allowNull: false,
   },
   category: {
-    type: DataTypes.ENUM('CONCERT', 'CONFERENCE', 'MATCH', 'SPECTACLE', 'FESTIVAL', 'OTHER'),
+    type: DataTypes.STRING,
     allowNull: false,
   },
   date: {

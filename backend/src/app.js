@@ -63,6 +63,7 @@ app.use('/api/events', require('./routes/event.routes'));
 app.use('/api/organizer', require('./routes/organizer.routes'));
 app.use('/api/tickets', require('./routes/ticket.routes'));
 app.use('/api/checkin', require('./routes/checkin.routes'));
+app.get('/api/categories', require('./controllers/category.controller').getAllCategories);
 
 // ─── Gestion des erreurs ───────────────────────────────────────────────
 

@@ -67,11 +67,11 @@ const getEventById = async (req, res) => {
   try {
     const { id } = req.params;
 
+    const { Ticket } = require('../models');
+
     const event = await Event.findOne({
       where: { 
         id,
-        // On autorise PUBLISHED, mais on peut aussi autoriser COMPLETED et CANCELLED
-        // pour que la page de l'événement s'affiche toujours même s'il est fini.
         status: { [Op.in]: ['PUBLISHED', 'COMPLETED', 'CANCELLED'] }
       },
       include: [
@@ -87,7 +87,19 @@ const getEventById = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Événement introuvable.' });
     }
 
-    res.json({ success: true, data: event });
+    // Calculer les billets vendus et disponibles
+    const ticketsSold = await Ticket.count({
+      where: {
+        eventId: event.id,
+        status: 'VALID' // On ne compte pas les billets annulés
+      }
+    });
+
+    const eventData = event.toJSON();
+    eventData.ticketsSold = ticketsSold;
+    eventData.availableTickets = event.capacity - ticketsSold;
+
+    res.json({ success: true, data: eventData });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'Erreur serveur.' });

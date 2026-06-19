@@ -39,11 +39,11 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-// Limite la taille de l'image à 5 Mo
+// Limite la taille de l'image à 20 Mo
 const upload = multer({ 
   storage, 
   fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 } // 5 MB
+  limits: { fileSize: 20 * 1024 * 1024 } // 20 MB
 });
 
 module.exports = upload;

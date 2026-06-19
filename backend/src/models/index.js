@@ -27,12 +27,11 @@ const User = require('./User');
 const Event = require('./Event');
 const Ticket = require('./Ticket');
 const Scan = require('./Scan');
+const Category = require('./Category');
 
-// ─── Relations ─────────────────────────────────────────────────────────
+// ─── RELATIONS ─────────────────────────────────────────────────────
 
-// Un organisateur crée plusieurs événements
-// hasMany  = "un User A plusieurs Events"
-// belongsTo = "un Event APPARTIENT à un User"
+// Un utilisateur (ORGANIZER) peut créer plusieurs événements
 User.hasMany(Event, { foreignKey: 'organizerId', as: 'events' });
 Event.belongsTo(User, { foreignKey: 'organizerId', as: 'organizer' });
 
@@ -58,4 +57,5 @@ module.exports = {
   Event,
   Ticket,
   Scan,
+  Category,
 };

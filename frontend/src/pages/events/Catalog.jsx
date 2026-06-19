@@ -9,6 +9,7 @@ const Catalog = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
+  const [categories, setCategories] = useState([]);
 
   const fetchEvents = async () => {
     setLoading(true);
@@ -27,14 +28,24 @@ const Catalog = () => {
   };
 
   useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await api.get('/categories');
+        setCategories(res.data.data.map(c => c.name));
+      } catch (err) {
+        console.error("Erreur chargement catégories", err);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
     // Petit délai (debounce) pour éviter d'appeler l'API à chaque frappe au clavier
     const delayDebounceFn = setTimeout(() => {
       fetchEvents();
     }, 300);
     return () => clearTimeout(delayDebounceFn);
   }, [search, category]);
-
-  const categories = ['CONCERT', 'MATCH', 'CONFERENCE', 'SPECTACLE', 'AUTRE'];
 
   return (
     <div className="bg-white min-h-screen pb-20">

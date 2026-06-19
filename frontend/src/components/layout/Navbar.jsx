@@ -35,9 +35,8 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3">
-            <img src={logoUrl} alt="EventPass" className="h-10 w-auto object-contain" />
-            <span className="font-black text-2xl tracking-tighter uppercase text-brand-black hidden sm:block">EventPass</span>
+          <Link to="/" className="flex items-center">
+            <img src={logoUrl} alt="EventPass" className="h-16 w-auto object-contain" />
           </Link>
 
           {/* Desktop Navigation */}
