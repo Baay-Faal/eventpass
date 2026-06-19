@@ -16,6 +16,8 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const path = require('path');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./config/swagger');
 const config = require('./config/env');
 const { sequelize } = require('./models');
 
@@ -41,6 +43,9 @@ app.use(morgan('dev'));
 app.use('/uploads', express.static(path.join(__dirname, '..', config.uploadPath)));
 
 // ─── Routes ────────────────────────────────────────────────────────────
+
+// Documentation Swagger
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Route de santé — vérifie que le serveur fonctionne
 app.get('/api/health', (req, res) => {
