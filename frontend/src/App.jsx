@@ -9,6 +9,7 @@ import MyTickets from './pages/visitor/MyTickets';
 import LiveTicket from './pages/visitor/LiveTicket';
 import Dashboard from './pages/organizer/Dashboard';
 import EventForm from './pages/organizer/EventForm';
+import CheckinScanner from './pages/agent/CheckinScanner';
 
 function App() {
   return (
@@ -32,6 +33,9 @@ function App() {
           {/* Routes Organisateur */}
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/dashboard/create" element={<EventForm />} />
+
+          {/* Routes Agent */}
+          <Route path="/scan" element={<CheckinScanner />} />
           
           {/* Les autres routes (Events, Dashboard, Checkin) viendront ici plus tard */}
         </Routes>
