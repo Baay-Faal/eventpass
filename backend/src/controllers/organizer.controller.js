@@ -5,7 +5,7 @@
  * Un événement passe par un cycle de vie : DRAFT → PUBLISHED.
  */
 
-const { Event } = require('../models');
+const { Event, Ticket } = require('../models');
 
 // GET /api/organizer/events
 // Liste tous les événements de l'organisateur connecté
@@ -158,10 +158,73 @@ const cancelEvent = async (req, res) => {
   }
 };
 
+// GET /api/organizer/dashboard
+// Statistiques globales de l'organisateur (billets vendus, revenus, taux de scan)
+const getDashboardStats = async (req, res) => {
+  try {
+    const organizerId = req.user.id;
+
+    // 1. Récupérer tous les événements de l'organisateur
+    const events = await Event.findAll({
+      where: { organizerId },
+      include: [
+        {
+          model: Ticket,
+          as: 'tickets',
+          // On ne compte que les billets valides ou utilisés (pas les annulés)
+          where: { status: ['VALID', 'USED'] },
+          required: false, // LEFT JOIN (pour inclure les événements sans billets)
+        }
+      ]
+    });
+
+    let totalCapacity = 0;
+    let totalTicketsSold = 0;
+    let totalRevenue = 0;
+    let totalScanned = 0;
+
+    // 2. Parcourir les événements pour calculer les stats
+    events.forEach(event => {
+      totalCapacity += event.capacity;
+      
+      const ticketsSold = event.tickets.length;
+      totalTicketsSold += ticketsSold;
+      
+      // Revenu = billets vendus * prix de l'événement
+      totalRevenue += (ticketsSold * parseFloat(event.price));
+
+      // Billets scannés à l'entrée
+      const scannedTickets = event.tickets.filter(t => t.status === 'USED').length;
+      totalScanned += scannedTickets;
+    });
+
+    // 3. Calcul du taux de présence (scan)
+    const scanRate = totalTicketsSold > 0 
+      ? Math.round((totalScanned / totalTicketsSold) * 100) 
+      : 0;
+
+    res.json({
+      success: true,
+      data: {
+        totalEvents: events.length,
+        totalCapacity,
+        totalTicketsSold,
+        totalRevenue,
+        totalScanned,
+        scanRate: `${scanRate}%`,
+      }
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Erreur serveur.' });
+  }
+};
+
 module.exports = {
   getMyEvents,
   createEvent,
   updateEvent,
   publishEvent,
   cancelEvent,
+  getDashboardStats,
 };

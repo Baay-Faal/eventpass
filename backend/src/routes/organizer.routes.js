@@ -16,6 +16,9 @@ const upload = require('../middlewares/upload.middleware');
 router.use(authMiddleware);
 router.use(roleMiddleware('ORGANIZER'));
 
+// GET /api/organizer/dashboard → Voir les statistiques
+router.get('/dashboard', organizerController.getDashboardStats);
+
 // GET /api/organizer/events → Liste ses événements
 router.get('/events', organizerController.getMyEvents);
 
